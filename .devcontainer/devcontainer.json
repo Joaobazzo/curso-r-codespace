@@ -1,0 +1,44 @@
+{
+  // Ambiente do curso: R 4.6 + pacotes espaciais (sf, terra, GDAL) + RStudio no navegador.
+  // A imagem do Rocker fixa o CRAN numa data (snapshot do Posit Package Manager),
+  // então todo aluno recebe exatamente as mesmas versões de pacotes.
+  "name": "Curso R Transportes",
+  "image": "ghcr.io/rocker-org/devcontainer/geospatial:4.6",
+
+  "features": {
+    "ghcr.io/rocker-org/devcontainer-features/rstudio-server:0": {}
+    // Para o Módulo 4 (r5r), descomentar:
+    // , "ghcr.io/devcontainers/features/java:1": { "version": "21" }
+  },
+
+  // 4 núcleos / 16 GB: suficiente para o curso inteiro, inclusive r5r.
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb"
+  },
+
+  // Instala os pacotes do módulo e baixa os dados da Release do GitHub.
+  // Fica em updateContentCommand (e não em postCreateCommand) porque só os
+  // comandos onCreate/updateContent rodam durante o prebuild: assim o aluno
+  // já recebe o ambiente com pacotes e dados prontos.
+  "updateContentCommand": "Rscript .devcontainer/preparar.R",
+
+  // Roda toda vez que o aluno abre o Codespace.
+  "postAttachCommand": {
+    "rstudio": "rserver"
+  },
+
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": {
+      "label": "RStudio",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["COMECE-AQUI.md"]
+    }
+  }
+}

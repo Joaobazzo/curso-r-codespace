@@ -1,0 +1,13 @@
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+# baixados pelo .devcontainer/preparar.R a partir da Release
+dados/
+LEIA-ME.txt
+
+# saídas geradas pelos alunos
+resultados/
+*_files/
+*.html

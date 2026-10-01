@@ -1,0 +1,192 @@
+---
+title: "1. Ambiente de trabalho"
+subtitle: "Módulo 1 — Fundamentos de R e manipulação de dados"
+format: html
+---
+
+Rode cada bloco com o botão ▶ no canto superior direito, ou com `Ctrl + Shift + Enter`
+com o cursor dentro do bloco. A saída aparece logo abaixo.
+
+## Onde você está
+
+Você está num **RStudio rodando na nuvem**, dentro de um *GitHub Codespace*: um computador
+Linux alugado pelo GitHub, com R, RStudio, os pacotes e os dados do curso já instalados. Ele é
+**idêntico** para todos os participantes, o que elimina a fonte mais comum de problema em
+curso de programação: "na minha máquina não funciona".
+
+Confira a versão do R:
+
+```{r}
+R.version.string
+```
+
+E o sistema operacional. Não é o seu Windows, é o Linux da nuvem:
+
+```{r}
+Sys.info()[["sysname"]]
+```
+
+::: {.callout-note}
+## E quando eu quiser usar o R no meu computador?
+
+O código que você escreve aqui roda igual no R instalado em qualquer máquina. O passo a
+passo de instalação local (R, RStudio, Rtools, liberações com a TI do Ministério) continua
+disponível no site do curso, no capítulo *Ambiente de trabalho*. Não é preciso fazer isso
+agora.
+:::
+
+## Os pacotes já estão aqui
+
+No R instalado no seu computador, você instalaria cada pacote uma vez com
+`install.packages()`. Aqui isso já foi feito. Confira:
+
+```{r}
+pacotes <- c("dplyr", "tidyr", "stringr", "lubridate", "ggplot2", "readxl", "sf", "terra")
+sapply(pacotes, requireNamespace, quietly = TRUE)
+```
+
+Todos devem aparecer como `TRUE`. As versões também são as mesmas para todo mundo:
+
+```{r}
+packageVersion("dplyr")
+packageVersion("sf")
+```
+
+## Trabalhe sempre dentro de um projeto
+
+Um **projeto do RStudio** é uma pasta com um arquivo `.Rproj`. Ele define o *diretório de
+trabalho*, o que torna os caminhos relativos estáveis. Este ambiente já é um projeto:
+`curso-r-codespace.Rproj`.
+
+```{r}
+getwd()
+list.files()
+```
+
+Os dados do Módulo 1 já foram baixados para `dados/`:
+
+```{r}
+list.files("dados", recursive = TRUE)
+```
+
+Estrutura recomendada para os seus projetos:
+
+```
+meu-projeto/
+├── meu-projeto.Rproj
+├── dados/            # dados de entrada (nunca editados à mão)
+│   └── brutos/
+├── R/                # scripts
+│   ├── 01-leitura.R
+│   ├── 02-limpeza.R
+│   └── 03-analise.R
+├── resultados/       # tabelas e gráficos gerados
+└── relatorios/       # .qmd / .Rmd
+```
+
+Três regras que evitam a maior parte dos problemas de reprodutibilidade:
+
+1. **Nunca** use `setwd("C:/Users/...")`. Use o projeto e caminhos relativos.
+2. **Nunca** edite o dado bruto. A limpeza é feita em código, para que seja auditável e
+   possa ser refeita quando o dado for atualizado.
+3. **Comece sempre com a sessão limpa.** Neste ambiente o RStudio já está configurado para
+   nunca salvar nem restaurar o `.RData`. No seu computador, ajuste isso em
+   `Tools > Global Options > General`.
+
+Para montar caminhos que funcionam em qualquer sistema operacional, use `file.path()`:
+
+```{r}
+caminho <- file.path("dados", "cabotagem_tku_2025.csv")
+caminho
+file.exists(caminho)
+```
+
+::: {.callout-tip}
+## Teste rápido
+
+O mesmo `file.path()` funciona no Linux da nuvem e no Windows do Ministério. Já um caminho
+como `"C:/Users/fulano/Desktop/dados.csv"` só funciona na máquina do fulano. Experimente:
+
+```{r}
+file.exists("C:/Users/fulano/Desktop/dados.csv")
+```
+:::
+
+## Pacotes: instalar, carregar, usar
+
+```{r}
+#| eval: false
+install.packages("dplyr")      # instala (uma vez; aqui já está feito)
+library(dplyr)                 # carrega (em cada sessão)
+dplyr::filter                  # usa sem carregar
+packageVersion("dplyr")        # versão instalada
+```
+
+Carregue o `dplyr` e veja a mensagem que ele mostra:
+
+```{r}
+library(dplyr)
+```
+
+As mensagens sobre objetos "mascarados" (*masked*) avisam que o `dplyr` tem funções com o mesmo
+nome de funções do R base, como `filter()`. Por isso o material usa às vezes a forma
+`dplyr::filter()`, que deixa explícito de qual pacote vem a função.
+
+::: {.callout-tip}
+## Registre as versões
+
+Ao final de um script ou relatório, `sessionInfo()` imprime a versão do R e de todos os
+pacotes carregados. Colar essa saída no anexo de um relatório técnico é o que permite
+reproduzir o resultado meses depois.
+:::
+
+```{r}
+sessionInfo()
+```
+
+## Trave as versões com `renv`
+
+Este ambiente resolve a reprodutibilidade **do curso**: todos têm as mesmas versões. Mas e
+os **seus** projetos, depois do curso? O `renv` dá a cada projeto a sua própria biblioteca
+de pacotes e um arquivo `renv.lock` com a versão exata de cada um.
+
+O problema que ele resolve é concreto. Você entrega uma nota técnica em 2026 com um script
+que roda. Em 2028 alguém precisa atualizar os números, abre o script, e ele falha: o `sf`
+mudou um argumento, o `dplyr` descontinuou uma função. Sem o `renv`, ninguém sabe mais com
+quais versões aquele resultado foi produzido.
+
+```{r}
+#| eval: false
+renv::init()       # uma vez, no início do projeto: cria a biblioteca e o renv.lock
+renv::snapshot()   # depois de instalar ou atualizar pacotes: grava as versões no lock
+renv::status()     # o lock está coerente com o que o código usa?
+renv::restore()    # na máquina de outra pessoa (ou na sua, daqui a dois anos)
+```
+
+## Onde procurar ajuda
+
+```{r}
+#| eval: false
+?mean                      # documentação da função
+help(package = "dplyr")    # documentação do pacote
+vignette(package = "sf")   # tutoriais longos do pacote
+example(mean)              # exemplos executáveis
+```
+
+Rode `?mean` no console (painel inferior esquerdo): a documentação abre no painel *Help*,
+à direita.
+
+## Exercício
+
+1. Crie uma pasta `resultados/` com `dir.create("resultados")`.
+2. Confira com `list.files()` que ela apareceu, também no painel *Files*, à direita.
+3. Qual é a versão do pacote `ggplot2` neste ambiente?
+
+```{r}
+# seu código aqui
+
+```
+
+---
+
+Próximo: `02-linguagem.qmd`.
