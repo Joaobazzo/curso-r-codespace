@@ -23,10 +23,11 @@
   // já recebe o ambiente com pacotes e dados prontos.
   "updateContentCommand": "Rscript .devcontainer/preparar.R",
 
-  // Roda toda vez que o aluno abre o Codespace.
-  "postAttachCommand": {
-    "rstudio": "rserver"
-  },
+  // Roda toda vez que o Codespace liga, mesmo sem o VS Code conectado: assim o
+  // endereço do RStudio (porta 8787) funciona direto dos favoritos.
+  // O chown corrige a permissão da pasta do RStudio Server, que vem da imagem
+  // como root; sem ele, o rserver falha com "Permission denied" em session-rpc-key.
+  "postStartCommand": "sudo chown -R $(id -un) /var/lib/rstudio-server && rserver",
 
   "forwardPorts": [8787],
   "portsAttributes": {
